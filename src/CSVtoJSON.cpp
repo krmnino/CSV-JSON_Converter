@@ -48,23 +48,44 @@ void converter(std::ifstream &infile, std::ofstream &outfile, std::vector<std::s
         for(int i = 0; i < header.size(); i++){
             json_contents.append("\t\t\"" + header[i] + "\": ");
             if(is_number(parsed_row[i])){
-                json_contents.append(parsed_row[i] + ",\n");
+                json_contents.append(parsed_row[i]);
             }
             else{
-                json_contents.append("\"" + parsed_row[i] + "\",\n");
+                json_contents.append("\"" + parsed_row[i] + "\"");
+            }
+            if(i != header.size() - 1){
+                json_contents.append(",\n");
+            }
+            else{
+                json_contents.append("\n");
             }
         }
         json_contents.append("\t},\n");
     }
-    json_contents.append("]");
-    std::cout << json_contents << std::endl;
+    json_contents = json_contents.substr(0, json_contents.length()-2);
+    json_contents.append("\n]");
+    outfile << json_contents;
+    std::cout << "JSON file successfully generated." << std::endl;
 }
 
 int main(int argc, char *argv[]){
+    if(argc != 3){
+        std::cout << "usage: ./CSVtoJSON [IN FILE PATH] [OUT DIR PATH]" << std::endl;
+        return 1;
+    }
     std::ifstream infile;
     std::ofstream outfile;
-	infile.open("/home/kurt/github/CSVtoJSON/src/PER_data.csv");
+	infile.open(argv[1]);
+    outfile.open(std::string(argv[2]));
+    if(!infile.good()){
+        std::cout << "Input file path is invalid." << std::endl;
+        return 1;
+    }
+    if(!outfile.good()){
+        std::cout << "Output file location is invalid." << std::endl;
+        return 1;
+    }
     std::vector<std::string> header = get_header(infile);
-    std::string out = "";
     converter(infile, outfile, header);
+    return 0;
 }
