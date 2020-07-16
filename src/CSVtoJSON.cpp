@@ -26,10 +26,10 @@ std::vector<std::string> get_header(std::ifstream &file){
 bool is_number(std::string &value){
     for(int i = 0; i < value.length(); i++){
         if(!isdigit(value[i])){
-            if(value[i] != '.'){
-                return false;
+            if(i == 0 && value[i] == '-'){
+                continue;
             }
-            if(i == 0 && value[i] != '-'){
+            if(value[i] != '.'){
                 return false;
             }
         }
@@ -40,12 +40,7 @@ bool is_number(std::string &value){
 void converter(std::ifstream &infile, std::ofstream &outfile, std::vector<std::string> &header){
     std::string json_contents = "[\n";
     std::string str_row;
-    bool header_check = false;
     while(getline(infile, str_row)){
-        if(!header_check){
-            header_check = true;
-            continue;
-        }
         std::vector<std::string> parsed_row = split_row_commas(str_row);
         json_contents.append("\t{\n");
         for(int i = 0; i < header.size(); i++){
