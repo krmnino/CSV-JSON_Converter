@@ -29,6 +29,9 @@ bool is_number(std::string &value){
             if(value[i] != '.'){
                 return false;
             }
+            if(i == 0 && value[i] != '-'){
+                return false;
+            }
         }
     }
     return true;
