@@ -24,7 +24,7 @@ void split_row_commas(std::vector<std::string> &parsed_row, std::string& str_row
 	parsed_row.push_back(str_row);
 }
 
-
+/*
 int get_header(std::string& file_to_string, std::vector<std::string>& header) {
 	std::stack<char> delimiters;
 	std::string object_str;
@@ -75,7 +75,7 @@ int get_header(std::string& file_to_string, std::vector<std::string>& header) {
 	return 0;
 }
 
-
+*/
 
 int converter(std::string& file_to_string, std::vector<std::string>& header) {
 	std::stack<char> delimiters;
@@ -203,6 +203,7 @@ void parse_raw_objects(std::string raw_object_str, std::vector<objects>& collect
 			single_obj.name = clean_name_str(raw_object_substr.substr(0, raw_object_substr.find(':')));
 			single_obj.def = clean_def_str(raw_object_substr.substr(raw_object_substr.find(':') + 1, raw_object_substr.length()));
 			full_obj.single_objects.push_back(single_obj);
+			collection.push_back(full_obj);
 			start_str_index = i;
 		}
 	}
@@ -212,8 +213,7 @@ void parse_raw_objects(std::string raw_object_str, std::vector<objects>& collect
 	single_obj.name = clean_name_str(raw_object_substr.substr(0, raw_object_substr.find(':')));
 	single_obj.def = clean_def_str(raw_object_substr.substr(raw_object_substr.find(':') + 1, raw_object_substr.length()));
 	full_obj.single_objects.push_back(single_obj);
-	std::cout << single_obj.name << " -> ";
-	std::cout << single_obj.def << std::endl;
+	collection.push_back(full_obj);
 }
 
 void split_objects(std::string& file_to_string, std::vector<objects>& collection) {
@@ -262,7 +262,18 @@ void split_objects(std::string& file_to_string, std::vector<objects>& collection
 	}
 }
 
-
+void get_header(std::vector<std::string>& header, std::vector<objects>& collection) {
+	for(int i = 0; i < collection.size(); i++){
+		for (int j = 0; j < collection[i].single_objects.size(); j++) {
+			if (!header_element_exists(header, collection[i].single_objects[j].name)) {
+				header.push_back(collection[i].single_objects[j].name);
+			}
+		}
+	}
+	for (int i = 0; i < header.size(); i++) {
+		std::cout << header[i] << std::endl;
+	}
+}
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
@@ -285,8 +296,7 @@ int main(int argc, char* argv[]) {
 	std::string file_to_string = "";
 	load_file_string(infile, file_to_string);
 	std::vector<objects> collection;
-	//std::cout << file_to_string << std::endl;
-	//std::vector<std::string> header;
+	std::vector<std::string> header;
 	/*
 	get_header(file_to_string, header);
 	for (int i = 0; i < header.size(); i++) {
@@ -297,5 +307,6 @@ int main(int argc, char* argv[]) {
 	//std::vector<std::string> header = get_header(infile);
 	//converter(infile, outfile, header);
 	split_objects(file_to_string, collection);
+	get_header(header, collection);
 	return 0;
 }
