@@ -5,133 +5,6 @@
 #include <vector>
 #include <stack>
 
-bool header_element_exists(std::vector<std::string>& header, std::string& element) {
-	for (int i = 0; i < header.size(); i++) {
-		if (header[i] == element) {
-			return true;
-		}
-	}
-	return false;
-}
-
-void split_row_commas(std::vector<std::string> &parsed_row, std::string& str_row) {
-	int comma = str_row.find(',');
-	while (comma != -1) {
-		parsed_row.push_back(str_row.substr(0, comma));
-		str_row = str_row.substr(comma + 1, str_row.length());
-		comma = str_row.find(',');
-	}
-	parsed_row.push_back(str_row);
-}
-
-/*
-int get_header(std::string& file_to_string, std::vector<std::string>& header) {
-	std::stack<char> delimiters;
-	std::string object_str;
-	std::string element;
-	int start_str_index = 0;
-	int end_str_index = 0;
-	for (int i = 0; i < file_to_string.length(); i++) {
-		if (file_to_string.at(i) == '[' && delimiters.size() == 0) {
-			delimiters.push(file_to_string.at(i));
-		}
-		else if (file_to_string.at(i) == '{') {
-			delimiters.push(file_to_string.at(i));
-			if (delimiters.size() == 1) {
-				return 1;
-			}
-			if (delimiters.size() == 2) {
-				start_str_index = i;
-			}
-		}
-		else if (file_to_string.at(i) == ']' || file_to_string.at(i) == '}') {
-			char pop_stack = delimiters.top();
-			delimiters.pop();
-			if (pop_stack == '{' && file_to_string.at(i) == '}' && delimiters.size() == 1) {
-				end_str_index = i;
-				object_str = file_to_string.substr(start_str_index, (end_str_index - start_str_index + 1));
-				std::vector<std::string> parsed_object;
-				split_row_commas(parsed_object, object_str);
-				for (int j = 0; j < parsed_object.size(); j++) {
-					start_str_index = parsed_object[j].find('"');
-					end_str_index = parsed_object[j].find(':');
-					element = parsed_object[j].substr(start_str_index, (end_str_index - start_str_index));
-					if (!header_element_exists(header, element)) {
-						header.push_back(element);
-					}
-				}
-			}
-			else if ((pop_stack == '{' && file_to_string.at(i) == '}' || pop_stack == '[' && file_to_string.at(i) == ']') && delimiters.size() > 1){
-				continue;
-			}
-			else {
-				return 1;
-			}
-		}
-	}
-	if (delimiters.size() != 0) {
-		return 1;
-	}
-	return 0;
-}
-
-*/
-
-int converter(std::string& file_to_string, std::vector<std::string>& header) {
-	std::stack<char> delimiters;
-	std::vector<std::string> parsed_object;
-	std::string object_str;
-	std::string element;
-	int start_str_index = 0;
-	int end_str_index = 0;
-	for (int i = 0; i < file_to_string.length(); i++) {
-		if (file_to_string.at(i) == '[') {
-			delimiters.push(file_to_string.at(i));
-		}
-		else if (file_to_string.at(i) == '{') {
-			delimiters.push(file_to_string.at(i));
-			if (delimiters.size() == 1) {
-				return 1;
-			}
-			if (delimiters.size() == 2) {
-				start_str_index = i;
-			}
-		}
-		else if (file_to_string.at(i) == ']' or file_to_string.at(i) == '}') {
-			char pop_stack = delimiters.top();
-			delimiters.pop();
-			switch (pop_stack) {
-			case '{':
-				if (file_to_string.at(i) == '}' && delimiters.size() == 1) {
-					end_str_index = i;
-					object_str = file_to_string.substr(start_str_index, (end_str_index - start_str_index + 1));
-					split_row_commas(parsed_object, object_str);
-					for (int j = 0; j < parsed_object.size(); j++) {
-						start_str_index = parsed_object[j].find('"');
-						end_str_index = parsed_object[j].find(':');
-						element = parsed_object[j].substr(start_str_index, (end_str_index - start_str_index));
-						if (!header_element_exists(header, element)) {
-							header.push_back(element);
-						}
-					}
-				}
-				else {
-					return 1;
-				}
-				break;
-			case '[':
-				if (file_to_string.at(i) == ']' && delimiters.size() != 1) {
-					continue;
-				}
-			}
-		}
-	}
-	return 0;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
-
 struct single_object {
 	std::string name;
 	std::string def;
@@ -262,6 +135,15 @@ void split_objects(std::string& file_to_string, std::vector<objects>& collection
 	}
 }
 
+bool header_element_exists(std::vector<std::string>& header, std::string& element) {
+	for (int i = 0; i < header.size(); i++) {
+		if (header[i] == element) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void get_header(std::vector<std::string>& header, std::vector<objects>& collection) {
 	for(int i = 0; i < collection.size(); i++){
 		for (int j = 0; j < collection[i].single_objects.size(); j++) {
@@ -269,9 +151,6 @@ void get_header(std::vector<std::string>& header, std::vector<objects>& collecti
 				header.push_back(collection[i].single_objects[j].name);
 			}
 		}
-	}
-	for (int i = 0; i < header.size(); i++) {
-		std::cout << header[i] << std::endl;
 	}
 }
 
