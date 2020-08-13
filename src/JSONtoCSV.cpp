@@ -229,16 +229,6 @@ int main(int argc, char* argv[]) {
 	std::vector<objects> collection;
 	std::vector<std::string> header;
 	std::vector<std::vector<std::string>> table;
-
-	/*
-	get_header(file_to_string, header);
-	for (int i = 0; i < header.size(); i++) {
-		std::cout << header[i] << std::endl;
-	}
-	*/
-	//std::cout << file_to_string << std::endl;
-	//std::vector<std::string> header = get_header(infile);
-	//converter(infile, outfile, header);
 	split_objects(file_to_string, collection);
 	get_header(header, collection);
 	generate_table(header, table, collection);
