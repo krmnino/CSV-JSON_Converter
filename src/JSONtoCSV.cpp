@@ -35,6 +35,14 @@ std::string clean_def_str(std::string input) {
 		for (char c : " \t") {
 			input.erase(std::remove(input.begin(), input.end(), c), input.end());
 		}
+		for (int i = 0; i < input.length(); i++) {
+			if (input.at(i) == '"') {
+				input.insert(i, "\\");
+				i++;
+			}
+		}
+		input.insert(0, "\"");
+		input += "\"";
 		return input;
 	}
 	string_qtd_index = input.find('[');
@@ -42,6 +50,8 @@ std::string clean_def_str(std::string input) {
 		for (char c : "\": \t") {
 			input.erase(std::remove(input.begin(), input.end(), c), input.end());
 		}
+		input.insert(0, "\"");
+		input += "\"";
 		return input;
 	}
 	string_qtd_index = input.find('"');
@@ -61,6 +71,7 @@ void parse_raw_objects(std::string raw_object_str, std::vector<objects>& collect
 	int end_str_index = 0;
 	std::string raw_object_substr;
 	std::stack<char> delimiters;
+	objects full_obj;
 	for (int i = 0; i < raw_object_str.length(); i++) {
 		if (raw_object_str.at(i) == '[' || raw_object_str.at(i) == '{') {
 			delimiters.push(raw_object_str.at(i));
@@ -71,17 +82,14 @@ void parse_raw_objects(std::string raw_object_str, std::vector<objects>& collect
 		else if (raw_object_str.at(i) == ',' && delimiters.size() == 0) {
 			end_str_index = i - 1;
 			raw_object_substr = raw_object_str.substr(start_str_index + 1, end_str_index - start_str_index);
-			objects full_obj;
 			single_object single_obj;
 			single_obj.name = clean_name_str(raw_object_substr.substr(0, raw_object_substr.find(':')));
 			single_obj.def = clean_def_str(raw_object_substr.substr(raw_object_substr.find(':') + 1, raw_object_substr.length()));
 			full_obj.single_objects.push_back(single_obj);
-			collection.push_back(full_obj);
 			start_str_index = i;
 		}
 	}
 	raw_object_substr = raw_object_str.substr(start_str_index + 1);
-	objects full_obj;
 	single_object single_obj;
 	single_obj.name = clean_name_str(raw_object_substr.substr(0, raw_object_substr.find(':')));
 	single_obj.def = clean_def_str(raw_object_substr.substr(raw_object_substr.find(':') + 1, raw_object_substr.length()));
@@ -154,6 +162,50 @@ void get_header(std::vector<std::string>& header, std::vector<objects>& collecti
 	}
 }
 
+int find_field_index(std::vector<std::string>& header, std::string& name) {
+	for (int i = 0; i < header.size(); i++) {
+		if (header[i] == name) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void generate_table(std::vector<std::string>& header, std::vector<std::vector<std::string>>& table, std::vector<objects>& collection) {
+	std::vector<std::string> row;
+	for (int i = 0; i < collection.size(); i++) {
+		row.resize(header.size());
+		for (int j = 0; j < collection[i].single_objects.size(); j++) {
+			int header_index = find_field_index(header, collection[i].single_objects[j].name);
+			row[header_index] = collection[i].single_objects[j].def;
+		}
+		table.push_back(row);
+		row.clear();
+	}
+}
+
+void write_to_csv(std::ofstream& outfile, std::vector<std::string>& header, std::vector<std::vector<std::string>>& table) {
+	for (int i = 0; i < header.size(); i++) {
+		if (i == header.size() - 1) {
+			outfile << header[i] + "\n";
+		}
+		else {
+			outfile << header[i] + ",";
+		}
+	}
+	for (int i = 0; i < table.size(); i++) {
+		for (int j = 0; j < table[i].size(); j++) {
+			if (j == table[i].size() - 1) {
+				outfile << table[i][j] + "\n";
+			}
+			else {
+				outfile << table[i][j] + ",";
+			}
+		}
+	}
+	outfile.close();
+}
+
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
 		std::cout << "usage: ./JSONtoCSV [IN FILE PATH] [OUT DIR PATH]" << std::endl;
@@ -176,6 +228,8 @@ int main(int argc, char* argv[]) {
 	load_file_string(infile, file_to_string);
 	std::vector<objects> collection;
 	std::vector<std::string> header;
+	std::vector<std::vector<std::string>> table;
+
 	/*
 	get_header(file_to_string, header);
 	for (int i = 0; i < header.size(); i++) {
@@ -187,5 +241,7 @@ int main(int argc, char* argv[]) {
 	//converter(infile, outfile, header);
 	split_objects(file_to_string, collection);
 	get_header(header, collection);
+	generate_table(header, table, collection);
+	write_to_csv(outfile, header, table);
 	return 0;
 }
