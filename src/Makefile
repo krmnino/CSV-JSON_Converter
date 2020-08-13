@@ -1,16 +1,24 @@
-TARGET = CSVtoJSON
+TARGET1 = CSVtoJSON
+TARGET2 = JSONtoCSV
 
-OBJS = CSVtoJSON.o
+OBJS1 = CSVtoJSON.o 
+OBJS2 = JSONtoCSV.o
 
 CXX = g++
 CXXFLAGS = -std=c++17
 
-$(TARGET):	$(OBJS)	
-		$(CXX) $(CXXFLAGS) $(OBJS) -g -o $(TARGET) $(LDFLAGS)
+all: $(TARGET1) $(TARGET2)
+
+$(TARGET1):	$(OBJS1)	
+		$(CXX) $(CXXFLAGS) $(OBJS1) -g -o $(TARGET1) $(LDFLAGS)
+
+$(TARGET2):	$(OBJS2)	
+		$(CXX) $(CXXFLAGS) $(OBJS2) -g -o $(TARGET2) $(LDFLAGS)
 		rm -f *.o
 
 clean:
-		rm -f *.o $(TARGET)
+		rm -f *.o $(TARGET1) $(TARGET2)
 
 CSVtoJSON.o: 	CSVtoJSON.cpp
+JSONtoCSV.o:	JSONtoCSV.cpp
 
