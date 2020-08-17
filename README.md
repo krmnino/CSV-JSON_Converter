@@ -1,2 +1,2 @@
 # CSV-JSON Converter
-A simple C++ that converts .csv files to .json and viceversa.
+A simple C++ program that converts .csv files to .json and viceversa.
